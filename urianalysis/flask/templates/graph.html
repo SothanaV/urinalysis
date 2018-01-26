@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Control</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='raphael-min.js') }}"></script>
+  <script src="{{ url_for('static', filename='jquery-1.8.2.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='socket.io-1.2.0.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='syntax.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='epoch.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+
+	<script src="{{ url_for('static', filename='jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='d3.js') }}"></script>
+	<script src="{{ url_for('static', filename='epoch.js') }}"></script>
+	<script src="{{ url_for('static', filename='data.js') }}"></script>
+	<script src="{{ url_for('static', filename='ZeroClipboard.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='moment.js') }}"></script>
+	<script src="{{ url_for('static', filename='socket.io-1.2.0.js') }}"></script>
+</head>
+<style type="text/css">
+	.button {
+    background-color: #b7b7b7; /* Green */
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+
+.button5 {border-radius: 80%;}
+</style>
+<body>
+	<div class="jumbotron text-center">
+  		<h1>Sensor</h1>
+		<div id="real-time-linetemp" class="epoch" style="height: 200px; position: relative;" data-epoch-container-id="epoch-container-6"> </div>
+	</div>
+
+</body>
+
+<script type="text/javascript">
+	var socket = io();
+	socket.on('volt',function(volt)
+	{
+		volt = parseFloat(volt);
+		console.log(volt);	
+	});
+	socket.on('current',function(current)
+	{
+		current = parseFloat(current);
+	});
+
+    var volt=0;
+	var current=0;
+		$(function() 
+		{
+		    var data = new RealTimeData(1);
+		    var chart = $('#real-time-linetemp').epoch({
+		        type: 'time.line',
+		        data: data.history(),
+		        axes: ['left', 'bottom', 'right']
+		    });
+
+		    setInterval(function() { 
+		    	//unow=moment().unix();
+		    	d=data.next();
+		    	
+		    	d[0].x=volt;
+		    	d[0].y=current;
+		    	chart.push(d);
+				//console.log(unow);
+		    	console.log(JSON.stringify(d));
+		    }, 1000);
+		    chart.push(data.next());
+		});
+		
+</script>

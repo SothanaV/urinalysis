@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Control</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=0.8">
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+  <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='raphael-min.js') }}"></script>
+  <script src="{{ url_for('static', filename='jquery-1.8.2.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='socket.io-1.2.0.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='syntax.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='epoch.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+
+	<script src="{{ url_for('static', filename='jquery.js') }}"></script>
+	<script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='d3.js') }}"></script>
+	<script src="{{ url_for('static', filename='epoch.js') }}"></script>
+	<script src="{{ url_for('static', filename='data.js') }}"></script>
+	<script src="{{ url_for('static', filename='ZeroClipboard.min.js') }}"></script>
+	<script src="{{ url_for('static', filename='moment.js') }}"></script>
+	<script src="{{ url_for('static', filename='socket.io-1.2.0.js') }}"></script>
+</head>
+<style type="text/css">
+	.button {
+    background-color: #b7b7b7; /* Green */
+    border: none;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+
+.button5 {border-radius: 80%;}
+</style>
+<body>
+	<div class="jumbotron text-center">
+  		<h1>Sensor</h1>
+  		<h2>Volt</h2>
+		<input type="range" min="0.00" max="100.00" value="volt" oninput="volt(this.value)" /><span id="range">0</span>
+		<h2>Current</h2>
+		<input type="range" min="0.00" max="100.00" value="volt" oninput="current(this.value)" /><span id="rangeC">0</span>
+	</div>
+
+</body>
+
+<script type="text/javascript">
+	var socket = io();
+	var data = {"v":0, "c":0}
+	function volt(volt)
+	{
+	document.getElementById("range").innerHTML=volt;
+	data["v"]=volt;
+	socket.emit('c2s',JSON.stringify(data));
+	}
+	function current(current)
+	{
+	document.getElementById("rangeC").innerHTML=current;
+	data["c"]=current;
+	socket.emit('c2s',JSON.stringify(data));
+	}
+</script>
