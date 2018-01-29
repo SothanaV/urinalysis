@@ -11,13 +11,17 @@ socketio = SocketIO(app)
 @app.route('/data')
 def render_simdata():
 	return render_template('simdata.html')
-@app.route('/log/<v>/<c>')
-def log(v,c):
-	voltage = float(data['v'])
-	current = float(data['c'])
+@app.route('/log/<c>/<v>')
+def log(c,v):
+	voltage = v
+	current = c
 	socketio.emit('volt',voltage)
 	socketio.emit('current',current)
 	socketio.emit('s2cS',{'v':voltage,'c':current})
+	global command
+	command = command
+	print(command)
+	return(command)
 @socketio.on('c2s')
 def recievedata(data):
 	data = json.loads(data)
@@ -65,3 +69,4 @@ def esp():
 	command = command
 	print(command)
 	return(command)
+
