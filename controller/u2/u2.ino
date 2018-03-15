@@ -21,7 +21,12 @@ const char* ssid     = "iot2";                         //Set ssid
 const char* password = "12345678";                    //Set Password
 const char* Server   = "192.168.137.1";           //set Server Domain or Server ip
 const char* port     = "5000";                       //set server port
+const char* port2     = "8003";                       //set server port
 ESP8266WiFiMulti WiFiMulti;
+
+String Vstr = "0" ; 
+String Istr = "0" ;
+//String json = ''' {"v":"1","i":"2"} ''' ;
 
 void setup() 
 {
@@ -40,7 +45,7 @@ void setup()
     Serial.println("[SETUP]:"+t);
     delay(1000);
   }
-
+  String str = "Hello";
 }
 
 void loop() 
@@ -49,7 +54,7 @@ void loop()
  uint16_t r_volt = adc.read(MCP3208::SINGLE_1);
  uint16_t val_current = adc.toAnalog(r_current);
  uint16_t val_volt = adc.toAnalog(val_current);
- Serial.print("Volt");Serial.print(val_volt);Serial.print(" Current");Serial.print(val_current);
+ Serial.print("Volt");Serial.print(val_volt);Serial.print(" Current");Serial.println(val_current);
  SendData(val_current,val_volt);
 }
 
@@ -66,7 +71,7 @@ void readA()
 
 void SendData(uint16_t val_current,uint16_t val_volt)
 {
-
+  Serial.println("Send_data");
 
 //float vmin = 0;
 //float vmax = 800;
@@ -79,8 +84,26 @@ void SendData(uint16_t val_current,uint16_t val_volt)
 
     if((WiFiMulti.run() == WL_CONNECTED)) 
     {
+        int l = 3;
+        //int n = 0;
+        for(int n = 0;n<=l;n++)
+        {
+        Serial.print("n : ");
+        Serial.println(n);
+        
         HTTPClient http;
-        String str = "http://" +String(Server)+":"+String(port)+"/log/"+val_current+"/"+val_volt;
+        //String str = "http://" +String(Server)+":"+String(port)+"/log/"+Vstr+"/"+Istr;
+        if(n==l)
+        {
+        String str = "http://" +String(Server)+":"+String(port2)+"/data/wemos/"+Vstr+"/"+Istr;
+        }
+        if(n=!l)
+        {
+        String str = "http://" +String(Server)+":"+String(port2)+"/data/wemos/"+"0"+"/"+"0"; 
+        }
+        //n = n+1;
+        String str = "http://" +String(Server)+":"+String(port2)+"/data/wemos/"+"0"+"/"+"0";
+        //String str = "Hello";
         Serial.println(str);
         http.begin(str);
         int httpCode = http.GET();
@@ -99,6 +122,7 @@ void SendData(uint16_t val_current,uint16_t val_volt)
                 String tg    = payload.substring(20,24);
                 String ag    = payload.substring(25,29);
                 String eg    = payload.substring(30,34);
+                String lg    = payload.substring(35,39);
                 float vmin  = vming.toFloat();
                 float vmax  = vmaxg.toFloat();
                 float vcc   = vccg.toFloat();
@@ -106,6 +130,7 @@ void SendData(uint16_t val_current,uint16_t val_volt)
                 float t     = tg.toFloat();
                 float a     = ag.toFloat();
                 float e     = eg.toFloat();
+                int l       = lg.toInt();
                 //Serial.println(vmin,vmax,vcc,pw,t,a,e);
                 Serial.print("Vmin:");Serial.println(vmin);
                 Serial.print("Vmax:");Serial.println(vmax);
@@ -114,31 +139,50 @@ void SendData(uint16_t val_current,uint16_t val_volt)
                 Serial.print("Period:");Serial.println(t);
                 Serial.print("Amplitude:");Serial.println(a);
                 Serial.print("StepE:");Serial.println(e);
-                GenWave(vmin,vmax,vcc,pw,t,a,e);
+                Serial.print("Loop:");Serial.println(l);
+                GenWave(vmin,vmax,vcc,pw,t,a,e,l);
               }
           }
+       }
     }
-
+    //Vstr = "0";
+    //Istr = "0";
+    
 }
 
-void GenWave(float vmin,float vmax,float vcc,float pw, float t,float a,float e)
+void GenWave(float vmin,float vmax,float vcc,float pw, float t,float a,float e,int l)
 {
     float v = vmin;
-    while(v<vmax)
+    for(int k =0;k<=l;k++)
     {
-      v = v+a;
-      int x = (int)((v/vcc)*4095.0f);
-      dac.setVoltage(x, false);
-      Serial.print(v);
-      readA();
-      delay(pw);
-      v=v-(a-e);
-      x = (int)((v/vcc)*4095.0f);
-      dac.setVoltage(x, false);
-      Serial.print(v);
-      readA();
-      delay(t-pw);
-    }
+      Serial.print("Loop No : ");
+      Serial.print(k);
+      while(v<vmax)
+      {
+        v = v+a;
+        int x = (int)((v/vcc)*4095.0f);
+        dac.setVoltage(x, false);
+        uint16_t rawV = adc.read(MCP3208::SINGLE_0);
+        uint16_t valV = adc.toAnalog(rawV);
+        uint16_t rawI = adc.read(MCP3208::SINGLE_1);
+        uint16_t valI = adc.toAnalog(rawI);
+        Vstr+= String(valV)+"," ;
+        Istr+= String(valI)+"," ;
+        delay(pw);
+        v=v-(a-e);
+        x = (int)((v/vcc)*4095.0f);
+        dac.setVoltage(x, false);
+        uint16_t rawV2 = adc.read(MCP3208::SINGLE_0);
+        uint16_t valV2 = adc.toAnalog(rawV);
+        uint16_t rawI2 = adc.read(MCP3208::SINGLE_1);
+        uint16_t valI2 = adc.toAnalog(rawI);
+        Vstr+= String(valV)+"," ;
+        Istr+= String(valI)+"," ;
+        delay(t-pw);
+        k = k+1;
+      }
+       
+    } 
 }
 
 

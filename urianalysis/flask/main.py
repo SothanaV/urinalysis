@@ -11,10 +11,10 @@ socketio = SocketIO(app)
 @app.route('/data')
 def render_simdata():
 	return render_template('simdata.html')
-@app.route('/log/<c>/<v>')
-def log(c,v):
+@app.route('/log/<v>/<i>')
+def log(v,i):
 	voltage = v
-	current = c
+	current = i
 	socketio.emit('volt',voltage)
 	socketio.emit('current',current)
 	socketio.emit('s2cS',{'v':voltage,'c':current})
@@ -46,12 +46,13 @@ def forms():
 	if request.method == 'POST':
 		vmin = int(request.form['vmin'])
 		vmax = int(request.form['vmax'])
+		vcc = int(request.form['vcc'])
 		pw = int(request.form['pw'])
 		t = int(request.form['t'])
 		a = int(request.form['a'])
-		e = int(request.form['vmin'])
+		e = int(request.form['e'])
 		loop = int(request.form['loop'])
-		command = ("%04d,%04d,%04d,%04d,%04d,%04d,%04d,"%(vmin,vmax,pw,t,a,e,loop))
+		command = ("%04d,%04d,%04d,%04d,%04d,%04d,%04d,%04d,"%(vmin,vmax,vcc,pw,t,a,e,loop))
 		print(command)
 		#return redirect(url_for('form'))
 		return render_template('form.html')
