@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block title %} Get Result {% endblock %} 
+{% block content %}
+<div width="800px" height="450px">
+  <canvas id="chart" style="max-height: 100%; max-width: 100%"></canvas>
+</div>
+<script type='text/javascript' src='{% static "js/Chart.min.js" %}'></script>
+<script type='text/javascript'>
+  let i = {{i}}
+  let v = {{v}}
+  let createTime = "{{create_time}}"
+  let ctx = document.getElementById("chart").getContext('2d');
+  let resultChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: v,
+      datasets: [{ 
+          data: i,
+          label: "I",
+          borderColor: "#3e95cd",
+          fill: false
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      title: {
+        display: true,
+        text: 'Experiment Result ' + createTime
+      },
+      legend: {
+        display: false
+      },
+    }
+  });
+</script>
+{% endblock%}
