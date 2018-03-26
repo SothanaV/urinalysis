@@ -20,7 +20,7 @@ void SendData(uint16_t val_current,uint16_t val_volt);
 
 const char* ssid     = "ois";                         //Set ssid
 const char* password = "ilovestudy";                    //Set Password
-const char* Server   = "192.168.1.4";           //set Server Domain or Server ip
+const char* Server   = "192.168.1.5";           //set Server Domain or Server ip
 const char* port     = "5000";                       //set server port
 const char* port2     = "8000";                       //set server port
 ESP8266WiFiMulti WiFiMulti;
