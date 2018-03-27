@@ -42,6 +42,7 @@ def sensor_parse(s):
 @csrf_exempt
 def data_in(request):
     if request.method == 'POST':
+        print(request.POST)
         print(request.POST['I'])
         print()
         print(request.POST['V'])
@@ -68,7 +69,10 @@ def get_result(request, pk):
         X_ = np.linspace(df.v.min(), df.v.max(), n)
         mdf = pd.DataFrame.from_dict({'v':X_, 'i':model.predict(X_)})
         mdf.i = gaussian_filter(mdf.i, sigma=20)
-        mdf = mdf.round(2)
+        mdf.v = (5/4095)*mdf.v
+        mdf.i = (4.2/4095)*mdf.i
+        # mdf = (3.4/4095)*mdf
+        mdf = mdf.round(3)
         context = mdf.to_dict(orient='list')
         context['id'] = inst.pk
         context['create_time'] = inst.create_time
