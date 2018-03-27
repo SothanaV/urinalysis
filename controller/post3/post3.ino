@@ -12,23 +12,21 @@
 #define ADC_VREF    3300     // 3.3V Vref
 #define ADC_CLK     1600000  // SPI clock 1.6MHz
 
-int timee;
 
 MCP3208 adc(ADC_VREF, SPI_CS);
 Adafruit_MCP4725 dac;
 
 void SendData(uint16_t val_current,uint16_t val_volt);
 
-const char* ssid     = "iot2";                         //Set ssid
-const char* password = "12345678";                    //Set Password
-const char* Server   = "192.168.137.1";           //set Server Domain or Server ip
+const char* ssid     = "ois";                         //Set ssid
+const char* password = "ilovestudy";                    //Set Password
+const char* Server   = "192.168.1.5";           //set Server Domain or Server ip
 const char* port     = "5000";                       //set server port
-const char* port2     = "8003";                       //set server port
+const char* port2     = "8000";                       //set server port
 ESP8266WiFiMulti WiFiMulti;
 
-String Vstr = "0," ; 
-String Istr = "0," ;
-//String json = ''' {"v":"1","i":"2"} ''' ;
+String Vstr = "" ; 
+String Istr = "" ;
 
 void setup() 
 {
@@ -50,33 +48,14 @@ void setup()
   String str = "Hello";
 }
 
-void loop() 
-{
- uint16_t r_current = adc.read(MCP3208::SINGLE_0);
- uint16_t r_volt = adc.read(MCP3208::SINGLE_1);
- uint16_t val_current = adc.toAnalog(r_current);
- uint16_t val_volt = adc.toAnalog(val_current);
- Serial.print("Volt");Serial.print(val_volt);Serial.print(" Current");Serial.println(val_current);
- SendData(val_current,val_volt);
-}
-
-
-void SendData(uint16_t val_current,uint16_t val_volt)
+void loop()
 {
   Serial.println("Send_data");
     if((WiFiMulti.run() == WL_CONNECTED)) 
     {
         HTTPClient http;
         Serial.println(Vstr);
-        //String str = "http://" +String(Server)+":"+String(port2)+"/data/wemos/"+Vstr+"/"+Istr;
         String str = "http://" +String(Server)+":"+String(port2)+"/data/wemos/"+"0"+"/"+"0";
-        
-        http.begin("http://" +String(Server)+":"+String(port2)+"/data/wemos2/");
-        http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-        //http.POST("title=foo&body=bar&userId=1");
-        http.POST("V="+Vstr+"&"+"I="+Istr);
-        http.writeToStream(&Serial);
-        http.end();
         Serial.println(str);
         http.begin(str);
         int httpCode = http.GET();
@@ -103,7 +82,7 @@ void SendData(uint16_t val_current,uint16_t val_volt)
                 float t     = tg.toFloat();
                 float a     = ag.toFloat();
                 float e     = eg.toFloat();
-                int l       = lg.toInt();
+                int L       = lg.toInt();
                 //Serial.println(vmin,vmax,vcc,pw,t,a,e);
                 Serial.print("Vmin:");Serial.println(vmin);
                 Serial.print("Vmax:");Serial.println(vmax);
@@ -112,24 +91,39 @@ void SendData(uint16_t val_current,uint16_t val_volt)
                 Serial.print("Period:");Serial.println(t);
                 Serial.print("Amplitude:");Serial.println(a);
                 Serial.print("StepE:");Serial.println(e);
-                Serial.print("Loop:");Serial.println(l);
-                GenWave(vmin,vmax,vcc,pw,t,a,e,l);
+                Serial.print("Loop:");Serial.println(L);
+                if(L>0)
+                {
+                  for(int k=0;k<L;k++)
+                  {
+                    Serial.print("Loop NO :");
+                    Serial.println(k);
+                    GenWave(vmin,vmax,vcc,pw,t,a,e);
+                  }
+                  
+                   Serial.println("END LOOP");
+                   HTTPClient http;
+                   http.begin("http://" +String(Server)+":"+String(port2)+"/data/wemos2/");
+                   http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+                   //http.POST("title=foo&body=bar&userId=1");
+                   http.POST("V="+Vstr+"&"+"I="+Istr);
+                   http.writeToStream(&Serial);
+                   http.end();
+                }
+                Vstr = "";
+                Istr = "";
               }
           }
        }
 }
 
-void GenWave(float vmin,float vmax,float vcc,float pw, float t,float a,float e,int l)
+void GenWave(float vmin,float vmax,float vcc,float pw, float t,float a,float e)
 {
     float v = vmin;
-    for(int k=0;k<l;k=k+1)
-    {
-      Serial.print("Loop No : ");
-      Serial.println(k);
       while(v<vmax)
       {
         v = v+a;
-        int x = (int)((v/vc c)*4095.0f);
+        int x = (int)((v/vcc)*4095.0f);
         dac.setVoltage(x, false);
         delay(pw);
         v=v-(a-e);
@@ -143,7 +137,6 @@ void GenWave(float vmin,float vmax,float vcc,float pw, float t,float a,float e,i
         Istr = Istr+valI2+",";
         delay(t-pw);
       } 
-    }
 }
 
 
