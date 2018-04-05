@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from app.views import formin, data_in, get_result, get_data
+from app.views import formin, data_in, get_result, get_data, render_base
 
 urlpatterns = [
     path('formin/', formin, name='formin'),
@@ -23,4 +23,6 @@ urlpatterns = [
     path('data/wemos2/', data_in),
     path('data/wemos/<int:read_v>/<int:read_i>', get_data),
     path('result/<int:pk>', get_result),
+    path('base/', render_base,name='base'),
+
 ]

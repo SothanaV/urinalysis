@@ -1,31 +1,30 @@
 <!DOCTYPE html>
 <html>
 <body>
-
 <form action="" method = "post">{% csrf_token %}
   V Start:
-  <input type="number" name="vmin" value="0" autofocus>mV
+  <input type="number" name="vmin" value="{{vmin}}" autofocus>mV
   <br><br>
   V Stop :
-  <input type="number" name="vmax" value="800" autofocus>mV
+  <input type="number" name="vmax" value="{{vmax}}" autofocus>mV
   <br><br>
   V cc :
-  <input type="number" name="vcc" value="3300" autofocus>mV
+  <input type="number" name="vcc" value="{{vcc}}" autofocus>mV
   <br><br>
   Pulse Width :
-  <input type="number" name="pw" value="50" autofocus>ms
+  <input type="number" name="pw" value="{{pw}}" autofocus>ms
   <br><br>
   Period :
-  <input type="number" name="t" value="100" autofocus>ms
+  <input type="number" name="t" value="{{t}}" autofocus>ms
   <br><br>
   Amplitude :
-  <input type="number" name="a" value="50" autofocus>mV
+  <input type="number" name="a" value="{{a}}" autofocus>mV
   <br><br>
   Step E :
-  <input type="number" name="e" value="10" autofocus>mV
+  <input type="number" name="e" value="{{e}}" autofocus>mV
   <br><br>
   loop :
-  <input type="number" name="loop" value="3" autofocus>
+  <input type="number" name="loop" value="{{loop}}" autofocus>
   <br><br>
   <input type="submit" value="Submit" autofocus>
 </form> 
