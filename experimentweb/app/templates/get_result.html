@@ -2,7 +2,11 @@
 {% load staticfiles %}
 {% block title %} Get Result {% endblock %} 
 {% block content %}
+<a href={{ id|add:"-1" }}> << </a>
+........ 
+<a href={{ id|add:"+1" }}> >> </a>
 <div width="800px" height="450px">
+  
   <canvas id="chart" style="max-height: 100%; max-width: 100%"></canvas>
 </div>
 <script type='text/javascript' src='{% static "js/Chart.min.js" %}'></script>
@@ -32,7 +36,16 @@
       legend: {
         display: false
       },
+      scales: {
+        xAxes: [{
+          ticks: {
+            min: 0,
+            max: 1,
+            stepSize: 0.05
+          }
+        }]
+      }
     }
   });
 </script>
-{% endblock%}
+{% endblock %}

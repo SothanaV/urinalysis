@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 
 from sklearn.isotonic import IsotonicRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import PolynomialFeatures
 from scipy.ndimage.filters import gaussian_filter
 
 from django.http import HttpResponse
@@ -10,9 +13,19 @@ from django.views.decorators.csrf import csrf_exempt
 from app.models import ExperimentResult
 # Create your views here.
 global command
+vmin = 0
+vmax = 800
+vcc = 3300
+pw = 50
+t = 100
+a = 25
+e = 5
+loop = 5
+
 command = "hello"
 def formin(request):
     global command
+    global vmin,vmax,vcc,pw,t,a,e,loop
     if request.method == 'POST':
         vmin = int(request.POST.get('vmin'))
         vmax = int(request.POST.get('vmax'))
@@ -24,10 +37,20 @@ def formin(request):
         loop = int(request.POST.get('loop'))
         command = ("%04d,%04d,%04d,%04d,%04d,%04d,%04d,%04d,"%(vmin,vmax,vcc,pw,t,a,e,loop))
         print(command)
-        return render(request,'form.html')
-    else:
-        print("ELSE")
-        return render(request,'form.html')
+        # return render(request,'form.html')
+    # else:
+        # print("ELSE")
+    context = {  
+        'vmin' : vmin,
+        'vmax' : vmax,
+        'vcc' : vcc,
+        'pw' : pw,
+        't' : t,
+        'a' : a,
+        'e' : e,
+        'loop' : loop,
+    }
+    return render(request,'form.html', context)
 
 def get_data(request,read_v,read_i):
     global command
@@ -37,7 +60,7 @@ def get_data(request,read_v,read_i):
 def sensor_parse(s):
     s = s.strip()
     s = s.split(',')
-    return [int(x) for x in s if x]
+    return [int(x)/100 for x in s if x]
 
 @csrf_exempt
 def data_in(request):
@@ -55,6 +78,50 @@ def data_in(request):
         print(res)
         return HttpResponse(res)
     return HttpResponse(status=404)
+'''
+def get_result(request, pk):
+    if request.method == 'GET':
+        inst = ExperimentResult.objects.get(pk=pk)
+        i = inst.get_i()
+        v = inst.get_v()
+        print(len(i))
+        print(len(v))
+        df = pd.DataFrame.from_dict({'i': i, 'v': v})
+        print(df.shape)
+        df = df.sort_values('v').reset_index()
+        mean = df.i.mean()
+        std = df.i.std()
+        # df = df[abs(df.i-mean)<(0.16*std)]
+        mdf = df
+        print(df.v.shape)
+        df=df[df.i<450]
+        X = df.v.values.reshape([df.v.shape[0], 1])
+        Y = df.i
+        
+        # model = IsotonicRegression().fit(X, Y)     #
+        model = make_pipeline(\
+                    PolynomialFeatures(5), 
+                    RandomForestRegressor(n_estimators=200, min_samples_split=2)\
+                ).fit(X, Y)
+        print(X.shape)
+        n = 1000
+        X_ = np.linspace(df.v.min(), df.v.max(), n)
+        mdf = pd.DataFrame.from_dict({'v':X_, 'i':model.predict(X_.reshape(-1, 1))})
+        mdf.i = gaussian_filter(mdf.i, sigma=20)      #
+        mdf = mdf.round(2)
+        mdf.v = (mdf.v/4095)*5.0 
+        mdf.i = ((mdf.i/4095)*5.0)/(33*10^5)
+        mdf.v = round(mdf.v,2)
+        context = mdf.to_dict(orient='list')
+        context['id'] = inst.pk
+        context['create_time'] = inst.create_time
+        print(context)
+        print()
+        return render(request, 'get_result.html', context)
+        #return HttpResponse(context)
+'''
+def render_base(request):
+    return render(request,'base.html')
 
 def get_result(request, pk):
     if request.method == 'GET':
@@ -62,17 +129,41 @@ def get_result(request, pk):
         i = inst.get_i()
         v = inst.get_v()
         df = pd.DataFrame.from_dict({'i': i, 'v': v})
-        X = df.v
+        # df = df[df.i<448]
+        #mean = df.i.mean()
+        #std = df.i.std()
+        # df = df[abs(df.i-mean)<(1*std)]
+        df = df.sort_values('v').reset_index()
+        mdf = df
+
+        # print(df)
+        #df=df[df.i<70]
+        
+        # 
+        # Randomforeest 
+        # 
+        # df = df[(df.i>0.003)&(df.i<0.004)]
+        X = df.v.values.reshape([df.v.shape[0], 1])
+        # X = df.v.values.reshape([df.v.shape[0], 1])
         Y = df.i
         n = 1000
-        model = IsotonicRegression().fit(X, Y)
+        model = make_pipeline(\
+                    PolynomialFeatures(5), 
+                    RandomForestRegressor(n_estimators=100, min_samples_split=100)\
+                ).fit(X, Y)
         X_ = np.linspace(df.v.min(), df.v.max(), n)
-        mdf = pd.DataFrame.from_dict({'v':X_, 'i':model.predict(X_)})
+        mdf = pd.DataFrame.from_dict({'v':X_, 'i':model.predict(X_.reshape(-1, 1))})
+        # mdf = pd.DataFrame.from_dict({'v':X, 'i':Y.reshape([df.v.shape[0], 1])})
         mdf.i = gaussian_filter(mdf.i, sigma=20)
-        mdf.v = (5/4095)*mdf.v
-        mdf.i = (4.2/4095)*mdf.i
-        # mdf = (3.4/4095)*mdf
-        mdf = mdf.round(3)
+        mdf = mdf.round(2)
+
+
+        mdf.v = (mdf.v/4095)*5.0 
+        mdf.i = ((mdf.i/4095)*5.0)/(0.033)
+        mdf.v = round(mdf.v,2)
+        mdf = mdf[(mdf.v>0.05)&(mdf.v<0.8)]
+        # mdf = mdf[(mdf.i>0.003)&(mdf.i<0.004)]
+        print(mdf.v.max())
         context = mdf.to_dict(orient='list')
         context['id'] = inst.pk
         context['create_time'] = inst.create_time
