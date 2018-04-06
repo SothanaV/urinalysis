@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'authen.apps.AuthenConfig',
     'app.apps.AppConfig'
 ]
 
@@ -71,6 +72,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'urineweb.wsgi.application'
 
+LOGIN_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/'
+ROOT_URL = '/'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases

@@ -1,0 +1,40 @@
+{% extends 'baseAuthen.html.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+<div class="login">
+  <div class="login-screen">
+    <div class="app-title">
+      <img src="{% static 'img/brandTu.png' %}" style="width: 40%">
+      <h1>Login</h1>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="login-form">
+        <div class="control-group">
+        {% if username %}    
+          <input type="text" class="login-field" name="username" value={{username}} placeholder="username" id="login-name">
+        {% else %}
+          <input type="text" class="login-field" name="username" value="" placeholder="username" id="login-name">
+        {% endif %}
+
+        <label class="login-field-icon fui-user" for="login-name"></label>
+        </div>
+
+        <div class="control-group">
+        <input type="password" class="login-field" name="password" value=""   placeholder="password" id="login-pass">
+        <label class="login-field-icon fui-lock" for="login-pass"></label>
+        </div>
+
+        {% if invalid %}
+          <div style="color:#FF0000; padding:10px;"> Invalid Username or Password. </div>
+        {% endif %}
+
+        <input type="hidden" name="next" value={{next}}>
+        <button class="btn btn-primary btn-large btn-block" type="submit">Login</button>
+      </div>
+    </form> 
+  </div>
+</div>
+{% endblock %}

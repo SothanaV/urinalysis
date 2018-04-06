@@ -27,10 +27,15 @@ class Command(models.Model):
     loop = models.IntegerField(default=3)
  
 class Device(models.Model):
+    IDLE = '1'
+    PENDING = '2'
+    STATUS_CHOICE = [(IDLE, 'idle'), (PENDING, 'pending')]
+
     serial = models.CharField(max_length=10, blank=True, unique=True)
     passwd = models.CharField(max_length=8, blank=True)
     command = models.OneToOneField(Command, null=True, blank=True, on_delete=models.SET_NULL)
     team = models.ForeignKey(Team, null=True, blank=True, on_delete=models.SET_NULL)
+    status = models.CharField(max_length=1, default=IDLE, choices=STATUS_CHOICE)
 
     def save(self, *args, **kwargs):
         if not self.pk:
@@ -50,15 +55,17 @@ class Device(models.Model):
         super(Device, self).save(*args, **kwargs)
 
 class Task(models.Model):
-    PENDING = '1'
-    DONE = '2'
-    STATUS_CHOICE = [(PENDING, 'pending'), (DONE, 'done')]
+    WAITING = '1'
+    PENDING = '2'
+    DONE = '3'
+    ABORT = '4'
+    STATUS_CHOICE = [(WAITING, 'waiting'), (PENDING, 'pending'), (DONE, 'done'), (ABORT, 'abort')]
 
     device = models.ForeignKey(Device, on_delete=models.PROTECT)
     command = models.ForeignKey(Command, blank=True, on_delete=models.PROTECT)
     create_time = models.DateTimeField(auto_now_add=True, blank=True)
     done_time = models.DateTimeField(null=True, blank=True)
-    status = models.CharField(max_length=1, default=PENDING, choices=STATUS_CHOICE)
+    status = models.CharField(max_length=1, default=WAITING, choices=STATUS_CHOICE)
     ri = models.CharField(max_length=6000, null=True, blank=True) 
     rv = models.CharField(max_length=6000, null=True, blank=True) 
 
@@ -68,10 +75,15 @@ class Task(models.Model):
         return [int(x) for x in s if x]
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and self.device.status == Device.IDLE:
             self.command = self.device.command
-        if self.status==Task.DONE and self.ri[0] != '[':
+            super(Task, self).save(*args, **kwargs)
+        elif self.status==Task.DONE and self.ri[0] != '[':
             self.ri = self.parse_to_json(self.ri)
             self.rv = self.parse_to_json(self.rv)
             self.done_time = timezone.now()
-        super(Task, self).save(*args, **kwargs)
+            self.device.status = Device.IDLE
+            self.device.save()
+            super(Task, self).save(*args, **kwargs)
+        else:
+            super(Task, self).save(*args, **kwargs)

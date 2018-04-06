@@ -8,6 +8,7 @@ import json
 from collections import defaultdict
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from app.models import Device, Task, Team, UserInformation
 
 User = get_user_model()
 
@@ -33,10 +34,18 @@ secret_var = defaultdict(str, secret_var)
 print()
 
 print("- Create Admin user")
-User.objects.create_superuser(
+admin_user = User.objects.create_superuser(
     username=secret_var['admin_username'],
     password=secret_var['admin_password'],
     email=secret_var['admin_email'],
 )
 
 print()
+print('team')
+tu_team = Team.objects.create(title='Thammasart')
+print('update userinfo')
+admin_userinfo = UserInformation.objects.create(user=admin_user, team=tu_team)
+print('device')
+device = Device.objects.create(team=tu_team)
+print('task')
+task = Task.objects.create(device=device)

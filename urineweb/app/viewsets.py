@@ -17,6 +17,7 @@ class DeviceViewSet(mixins.ListModelMixin,
         return Device.objects.filter(team=self.request.user.userinfo.team)
 
 class TaskViewSet(mixins.ListModelMixin,
+                    mixins.CreateModelMixin,
                     viewsets.GenericViewSet):
     serializer_class = TaskSerializer
     permission_classes = (IsAuthenticated, )

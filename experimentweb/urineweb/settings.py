@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django_extensions',
-    'app',
+    'app.apps.AppConfig',
+    'authen.apps.AuthenConfig'
 ]
 
 MIDDLEWARE = [
@@ -71,6 +72,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'urineweb.wsgi.application'
+
+LOGIN_URL = '/auth/login/'
+LOGOUT_REDIRECT_URL = '/'
+ROOT_URL = '/'
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media/'
 
 
 # Database
@@ -122,6 +131,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_URL = '/static/'
+STATIC_ROOT = 'static/root/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "app"),
+    os.path.join(BASE_DIR, "static"),
+    '/var/www/static/',
 ]

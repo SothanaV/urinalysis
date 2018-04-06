@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %} Home {% endblock %}
+{% block content %} 
+
+<div id='content' style="margin-top:5%">
+  <table class='uk-table uk-table-striped uk-table-hover  uk-table-small'>
+    <caption style="margin-left:1%">Device List</caption>
+    <thead>
+      <tr style="background-color:rgb(247, 238, 189);margin-left:3%;" >
+        <th style="color:rgb(52, 52, 54)"> # </th>
+        <th style="color:rgb(52, 52, 54)"> Device </th>
+        <th style="color:rgb(52, 52, 54)"> Status </th>
+      </tr>
+    </thead>
+    <tbody v-for='(device, i) in deviceList'>
+       <td> [[i+1]] </td>
+       <td> [[device.serial]] </td>
+       <td> [[device.status | deviceStatusLabel]] </td>
+    </tbody>
+  </table>
+
+  <table class='uk-table uk-table-striped uk-table-hover  uk-table-small'>
+    <caption style="margin-left:1%">Task List</caption>
+    <thead>
+      <tr style="background-color:rgb(247, 238, 189);margin-left:3%;" >
+        <th style="color:rgb(52, 52, 54)"> # </th>
+        <th style="color:rgb(52, 52, 54)"> Device </th>
+        <th style="color:rgb(52, 52, 54)"> Status </th>
+      </tr>
+    </thead>
+    <tbody v-for='(task, i) in taskList'>
+       <td> [[i+1]] </td>
+       <td> [[task.device.serial]] </td>
+       <td> [[task.status | taskStatusLabel ]] </td>
+    </tbody>
+  </table>
+</div>
+
+<script type='text/javascript'>
+var content = new Vue({
+  el: '#content',
+  delimiters: ['[[', ']]'],
+  data: function () {
+    return {
+      'message': 'Hello',
+      'deviceList': null,
+      'taskList': null,
+    }
+  },
+  methods: {
+  },
+  filters: {
+    deviceStatusLabel: function (value) {
+      return value==1? 'IDLE': 'WAITING'
+    },
+    taskStatusLabel: function (value) {
+      switch (value) {
+        case '1':
+         return 'WAITING'
+        case '2':
+          return 'PENDING'
+        case '3':
+          return 'DONE'
+        case '4':
+          return 'ABORT'
+      }
+    }
+  },
+
+  mounted: function () {
+    axios.get('/api/device/')
+      .then((response) => {
+        this.deviceList = response.data
+      })
+      .catch((error) => {
+        alert(error)
+      })
+    axios.get('/api/task/')
+      .then((response) => {
+        this.taskList = response.data
+      })
+      .catch((error) => {
+        alert(error)
+      })
+  }
+})
+</script>
+{% endblock %}

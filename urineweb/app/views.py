@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from app.models import Task, Device, Command
 
+
 def _model_to_dict(instance):
     print(serializers.serialize('json', [ instance, ]))
     return json.loads(serializers.serialize('json', [ instance, ]))[0]
@@ -13,12 +14,29 @@ def _model_to_dict(instance):
 def get_command(request, serial):
     try:
         device = Device.objects.get(serial=serial)
-        task = Task.objects.create(device=device)
-        res = _model_to_dict(device.command)['fields']
-        res['id'] = task.pk
-        return JsonResponse(res)
+        print(device.status)
+        if device.status == Device.PENDING:
+            device.status = Device.IDLE
+            for task in Task.objects.filter(device=device, status=Task.PENDING):
+                task.status = Task.ABORT
+                task.save()
+                print('abort task', task)
+            device.save()
+
+        qs = Task.objects.filter(device=device, status=Task.WAITING)
+        if qs.exists():
+            task = qs[0]
+            task.status = Task.PENDING
+            task.save()
+            device.status = Device.PENDING
+            device.save()
+            res = _model_to_dict(device.command)['fields']
+            res['id'] = task.pk
+            return JsonResponse(res)
+        else:
+            return HttpResponse('IDLE', status=200) 
     except ObjectDoesNotExist as err:
-        return HttpResponse(status=404)
+        return HttpResponse('Invalid Device', status=404)
 
 @csrf_exempt
 def submit_result(request, pk):
@@ -40,8 +58,12 @@ def submit_result(request, pk):
     else:
         return HttpResponse(status=403)
 
-def 
-def start(request):
+
+def start(request, serial):
     if request.method == "GET":
-        return render(request, 'command.html')
-    
+        device = Device.objects.get(serial=serial)
+        return render(request, 'app/start.html', {'device':device})
+
+def homepage(request):
+    if request.method == "GET":
+        return render(request, 'app/homepage.html')

@@ -5,9 +5,10 @@ from app.models import Task, Device
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
-        fields = ('id', 'serial', )
+        fields = ('id', 'serial', 'status')
 
 class TaskSerializer(serializers.ModelSerializer):
+    device = DeviceSerializer()
     class Meta:
         model = Task
         fields   = '__all__'

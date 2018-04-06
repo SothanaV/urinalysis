@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}  {% endblock %}
+{% block content %} 
+<div id='content'>
+  <form>
+    <div v-for='d in this.formData'>
+      <label> [[d.label]] </label>
+      <input v-model.number="d.value" /> 
+    </div>
+
+    <button> start </button>
+  </form>
+
+</div>
+
+<script type="text/javascript">
+new Vue({
+  el: '#content',
+  delimiters: ['[[', ']]'],
+  data: function () {
+    return {
+      formData: [
+        {label: 'vmin', value: 0},
+        {label: 'vmax', value: 0},
+        {label: 'vcc', value: 0},
+        {label: 'pw', value: 0},
+        {label: 't', value: 0},
+        {label: 'a', value: 0},
+        {label: 'e', value: 0},
+        {label: 'loop', value: 0}
+      ]
+    }
+  }
+})
+</script>
+{% endblock %}
