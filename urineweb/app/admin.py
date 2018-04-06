@@ -4,3 +4,4 @@ from app.models import Command, Device, Task
 admin.site.register(Command)
 admin.site.register(Device)
 admin.site.register(Task)
+

@@ -1,11 +1,5 @@
 import json
-import uuid
-import pytz
-import datetime
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-from django.utils.crypto import get_random_string
 
 usermodel = get_user_model()
 
@@ -68,11 +62,6 @@ class Task(models.Model):
     status = models.CharField(max_length=1, default=WAITING, choices=STATUS_CHOICE)
     ri = models.CharField(max_length=6000, null=True, blank=True) 
     rv = models.CharField(max_length=6000, null=True, blank=True) 
-
-    def parse_to_json(self, s):
-        s = s.strip()
-        s = s.split(',')
-        return [int(x) for x in s if x]
 
     def save(self, *args, **kwargs):
         if not self.pk and self.device.status == Device.IDLE:

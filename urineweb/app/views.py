@@ -1,7 +1,14 @@
-import json
-from django.shortcuts import render
-from django.core import serializers
-from django.http import HttpResponse, JsonResponse
+import pandas as pd
+import numpy as np
+
+from sklearn.isotonic import IsotonicRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import PolynomialFeatures
+from scipy.ndimage.filters import gaussian_filter
+
+from django.http import HttpResponse
+from django.shortcuts import render,redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
 from app.models import Task, Device, Command
