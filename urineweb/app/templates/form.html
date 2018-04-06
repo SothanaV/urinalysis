@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<body>
+<form action="" method = "post">{% csrf_token %}
+  V Start:
+  <input type="number" name="vmin" value="{{vmin}}" autofocus>mV
+  <br><br>
+  V Stop :
+  <input type="number" name="vmax" value="{{vmax}}" autofocus>mV
+  <br><br>
+  V cc :
+  <input type="number" name="vcc" value="{{vcc}}" autofocus>mV
+  <br><br>
+  Pulse Width :
+  <input type="number" name="pw" value="{{pw}}" autofocus>ms
+  <br><br>
+  Period :
+  <input type="number" name="t" value="{{t}}" autofocus>ms
+  <br><br>
+  Amplitude :
+  <input type="number" name="a" value="{{a}}" autofocus>mV
+  <br><br>
+  Step E :
+  <input type="number" name="e" value="{{e}}" autofocus>mV
+  <br><br>
+  loop :
+  <input type="number" name="loop" value="{{loop}}" autofocus>
+  <br><br>
+  <input type="submit" value="Submit" autofocus>
+</form>
+<br>
+
+<form action="{% url 'start'%}" method="get">
+  <input type="submit" value="START" autofocus>
+</form>
+
+</body>
+</html>
+
