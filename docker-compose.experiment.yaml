@@ -1,0 +1,10 @@
+version: "2"
+services:
+  web:
+    build: ./experimentweb
+    volumes:
+      - ./experimentweb:/web
+    ports:
+      - "8000:8000"
+    restart: always
+    command: "sh run.sh"
