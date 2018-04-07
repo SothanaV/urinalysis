@@ -27,6 +27,7 @@ t = 100
 a = 25
 e = 5
 loop = 5
+memo = ''
 c2w = 'ready'
 command = "hello"
 
@@ -122,11 +123,11 @@ def render_base(request):
     return render(request,'base.html')
 
 def find_peak(df):
-    return df[df.v==0.47].i.max()
+    return df[(df.v>0.45)&(df.v==0.49)].i.max()
 
 def set_param(request):
     global command, c2w
-    global vmin,vmax,vcc,pw,t,a,e,loop
+    global vmin,vmax,vcc,pw,t,a,e,loop,memo
     if request.method == 'POST':
         values = json.loads(request.body.decode('utf-8'))
         vmin = int(values.get('vmin'))
@@ -137,6 +138,10 @@ def set_param(request):
         a    = int(values.get('a'))
         e    = int(values.get('e'))
         loop = int(values.get('loop'))
+        if values.get('memo'):
+            memo = values.get('memo')
+        else:
+            memo = ""
         command = ("%04d,%04d,%04d,%04d,%04d,%04d,%04d,%04d,"%(vmin,vmax,vcc,pw,t,a,e,loop))
         c2w = 'start'
         return HttpResponse(command+c2w, status=200)
@@ -174,13 +179,16 @@ def get_result(request, pk=-1):
                 # Randomforeest 
                 # 
                 # df = df[(df.i>0.003)&(df.i<0.004)]
+                df = df
                 X = df.v.values.reshape([df.v.shape[0], 1])
                 Y = df.i
                 n = 1000
+                print()
                 model = make_pipeline(\
                             PolynomialFeatures(5), 
                             RandomForestRegressor(n_estimators=100, min_samples_split=100, random_state=1)\
                         ).fit(X, Y)
+                print('xdawdaw')
                 X_ = np.linspace(df.v.min(), df.v.max(), n)
                 mdf = pd.DataFrame.from_dict({'v':X_, 'i':model.predict(X_.reshape(-1, 1))})
                 mdf.i = gaussian_filter(mdf.i, sigma=20)
@@ -191,7 +199,8 @@ def get_result(request, pk=-1):
                 mdf.i = ((mdf.i/4095)*5.0)/(0.033)
                 mdf.v = round(mdf.v,2)
                 mdf = mdf[(mdf.v>0.05)&(mdf.v<0.8)]
-
+                print(mdf)
+                
                 #
                 # find urine
                 #
@@ -216,9 +225,10 @@ def get_result(request, pk=-1):
                     'a': 'amplitude',
                     'e':  'step',
                     'loop': 'loop',
-                    'cell': 'conductivity'
+                    'cell': 'conductivity',
+                    'memo': 'memo'
                 }
-                _params = {mapping[k]: getattr(inst, k) for k in ['vmin', 'vmax', 'vcc', 'pw', 't', 'a', 'e', 'loop', 'cell']}
+                _params = {mapping[k]: getattr(inst, k) for k in ['vmin', 'vmax', 'vcc', 'pw', 't', 'a', 'e', 'loop', 'cell', 'memo']}
                 context.update(_context)
                 context['params'] = _params
                 context['id'] = inst.pk

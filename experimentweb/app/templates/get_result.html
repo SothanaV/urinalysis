@@ -23,12 +23,13 @@
   <div class="uk-container uk-width-1-1">
       <!-- Nev SECTION -->
     <div class="uk-card uk-card-default uk-card-body uk-width-1-1">
+      <h3> Nevigation </h3>
       <div class="uk-grid">
-        <a href={% url 'result' id|add:"-1" %} class="uk-icon-button .uk-icon-large mybutton" :uk-icon="'chevron-left'"></a>
+        <a href={% url 'result' id|add:"-1" %} class="uk-icon-button uk-margin-medium-left uk-icon-large mybutton"> </a>
         <form class="uk-margin-remove" v-on:submit.prevent="searchurl">
           <input class="uk-input" type="text" placeholder="Search..." v-model.number="searchid" >
         </form>
-        <a href={% url 'result' id|add:"+1" %} class="uk-icon-button uk-margin-medium-left .uk-icon-large mybutton" :uk-icon="'chevron-right'"></a>
+        <a href={% url 'result' id|add:"+1" %} class="uk-icon-button uk-margin-medium-left uk-icon-large mybutton" :uk-icon="'chevron-right'"></a>
       </div>
     </div>
   </div>
@@ -49,12 +50,8 @@
               <span class="normaltext"> [[calUric()]] mg/dL</span>
             </li>
           </ul>
-          <canvas id='gauge'></canvas>
+          <canvas id='gauge' style="width: 100%; height: 100%" ></canvas>
           <br>
-<!--           <input type="radio" id="one" value="f" v-model="gender">
-          <label for="one">female</label>
-          <input type="radio" id="two" value="m" v-model="gender">
-          <label for="two">male</label> -->
           <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
             <label><input class="uk-radio myradio " type="radio" v-model="gender" value='f' checked> female </label>
             <label><input class="uk-radio myradio " type="radio" v-model="gender" value='m'> male </label>
@@ -69,6 +66,8 @@
             </li>
           {% endfor %}
           </ul>
+          <hr>
+          <br>
         </div>
       </div>
       <div class="uk-width-4-5">
@@ -101,6 +100,9 @@
         </div>
       </div>
       <br>
+      <label> note: </label>
+      <textarea class="uk-textarea" v-model="memo">  </textarea>
+      <br>
       <input class='uk-button' type="submit" value="START" @click="setparam">
     </div>
     <input class='uk-button' type="submit" value="GET RESULT" @click="reload" v-if="submited">
@@ -114,7 +116,7 @@
 
 <script type='text/javascript'>
   var tmp = "{{message}}"
-  var uric = parseFloat({{urine}})
+  var uric = (parseFloat({{urine}})*10).toFixed(2)
   console.log(uric)
   let content = new Vue({
     el: "#content",
@@ -134,8 +136,9 @@
           {label: 't', value: {{t}}},
           {label: 'a', value: {{a}}},
           {label: 'e', value: {{e}}},
-          {label: 'loop', value: {{loop}}}
-        ]
+          {label: 'loop', value: {{loop}}},
+        ],
+        memo: ''
       }
     },
 
@@ -152,7 +155,7 @@
         }
       let femaleLabels = {
           font: "18px sans-serif",  // Specifies font
-          labels: [0, 3.4, 7.0, 10],  // Print labels at these values
+          labels: [0, 2.4, 6.0, 10],  // Print labels at these values
           color: "#000000",  // Optional: Label text color
           fractionDigits: 0  // Optional: Numerical precision. 0=round off.
         }
@@ -207,7 +210,7 @@
           }
         let femaleLabels = {
             font: "18px sans-serif",  // Specifies font
-            labels: [0, 3.4, 7.0, 10],  // Print labels at these values
+            labels: [0, 2.4, 6.0, 10],  // Print labels at these values
             color: "#000000",  // Optional: Label text color
             fractionDigits: 0  // Optional: Numerical precision. 0=round off.
           }
@@ -257,7 +260,7 @@
       },
 
       calUric: function () {
-        return (uric*16.9).toFixed(4)
+        return (uric*16.9).toFixed(2)
       },
 
       searchurl: function () {
@@ -269,6 +272,7 @@
         this.formData.forEach( d => {
           payload[d.label] = d.value
         })
+        payload['memo'] = this.memo
         console.log(payload)
         axios.post('/setparam/', payload)
           .then(res => {
