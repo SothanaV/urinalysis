@@ -14,6 +14,7 @@ class ExperimentResult(models.Model):
     loop = models.IntegerField(default=3)
     i = models.CharField(max_length=3000)
     v = models.CharField(max_length=3000)
+    
 
     def set_v(self, v):
         self.v = json.dumps(v)

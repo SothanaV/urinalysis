@@ -17,13 +17,15 @@ from django.contrib import admin
 from django.conf import settings
 from django.urls import path, include
 from django.conf.urls.static import static
-from app.views import formin, data_in, get_result, get_data, render_base
+from app.views import formin, get_state, data_in, set_param, get_result, get_data, render_base
 urlpatterns = [
     path('formin/', formin, name='formin'),
     path('admin/', admin.site.urls),
     path('data/wemos2/', data_in),
-    path('data/wemos/<int:read_v>/<int:read_i>', get_data),
+    path('data/wemos3/', get_state),
+    path('data/wemos/', get_data),
     path('result/<int:pk>/', get_result, name='result'),
+    path('setparam/', set_param, name='setparam'),
     path('base/', render_base,name='base'),
     path('', get_result, name='homepage'),
     path('auth/', include('authen.urls')),
