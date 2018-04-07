@@ -60,14 +60,17 @@
           <h2> Parameter </h2>
           <ul>
           {% for key, value in params.items %}
-            <li>
+            {% if key != 'memo' %}
+              <li>
                 <span class="param"> {{key}}: </span> 
                 <span class="normaltext"> {{value}} </span> 
-            </li>
+              </li>
+            {% endif %}
           {% endfor %}
           </ul>
           <hr>
-          <br>
+          <h2> Note </h2>
+          <p>{{memo}}</p>
         </div>
       </div>
       <div class="uk-width-4-5">

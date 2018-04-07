@@ -231,6 +231,7 @@ def get_result(request, pk=-1):
                 _params = {mapping[k]: getattr(inst, k) for k in ['vmin', 'vmax', 'vcc', 'pw', 't', 'a', 'e', 'loop', 'cell', 'memo']}
                 context.update(_context)
                 context['params'] = _params
+                context['memo'] = inst.memo
                 context['id'] = inst.pk
                 context['urine'] = urine
                 context['message'] = 'graph'
