@@ -119,7 +119,7 @@
 
 <script type='text/javascript'>
   var tmp = "{{message}}"
-  var uric = (parseFloat({{urine}})*10).toFixed(2)
+  var uric = (parseFloat({{urine}})).toFixed(2)
   console.log(uric)
   let content = new Vue({
     el: "#content",
@@ -263,7 +263,7 @@
       },
 
       calUric: function () {
-        return (uric*16.9).toFixed(2)
+        return (uric*10*16.9).toFixed(2)
       },
 
       searchurl: function () {
